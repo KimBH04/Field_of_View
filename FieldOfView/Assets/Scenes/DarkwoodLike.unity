@@ -434,7 +434,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (5)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -495,7 +495,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (4)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -564,7 +564,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (6)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -736,7 +736,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (1)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -839,7 +839,7 @@ GameObject:
   - component: {fileID: 1165202996}
   - component: {fileID: 1165202995}
   m_Layer: 0
-  m_Name: Enemy (2)
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1050,7 +1050,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (3)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4552,7 +4552,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square (2)
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4570,7 +4570,7 @@ GameObject:
   - component: {fileID: 2092023877}
   - component: {fileID: 2092023876}
   m_Layer: 0
-  m_Name: Enemy (1)
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4693,7 +4693,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6997130739126309769, guid: f4110ea8142587245a0ef1457b08540d, type: 3}
       propertyPath: m_Name
-      value: Square
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
