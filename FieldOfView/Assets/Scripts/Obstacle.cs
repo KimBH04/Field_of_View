@@ -41,6 +41,10 @@ public class Obstacle : MonoBehaviour
 
     private void ShadowCast()
     {
+        // 오브젝트의 메시 버텍스를 시점과 50배 먼 위치에도 똑같이 복사한 뒤
+        // 점들에서 볼록 다각형을 구해 동적으로 그림자 생성
+        // 중간 어느 한 점이 들어간 오목 다각형은 제대로 구할 수 없음
+
         shadowVertices = new Vector3[meshVerticesCount * 2];
         for (int i = 0; i < meshVerticesCount; i++)
         {
@@ -48,7 +52,17 @@ public class Obstacle : MonoBehaviour
             shadowVertices[i + meshVerticesCount] = (vertices[i] - viewer.position) * 50f;
         }
 
-        int n = ConvexHull(shadowVertices, convexHull);
+        int n;
+        try
+        {
+            n = ConvexHull(shadowVertices, convexHull);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+            gameObject.SetActive(false);
+            return;
+        }
 
         // 구한 다각형에서 n - 2개의 삼각형 구역 나누기
         // 다각형의 점들이 어떤 방향으로든 반드시 정렬되어 있어야 함
@@ -92,50 +106,53 @@ public class Obstacle : MonoBehaviour
     /// <returns> 볼록 다각형을 이루는 점의 개수 </returns>
     private static int ConvexHull(Vector3[] vertices, Vector3[] result)
     {
-        // 그라함 스캔
-        // 특) 버그가 좀 있다
-        Vector3 min = vertices[0];
-        foreach (Vector3 v in vertices[1..])
+        // 점의 개수가 너무 적음!
+        if (vertices.Length < 3)
         {
-            if (min.y > v.y)
+            throw new ArgumentException("Too few dots.");
+        }
+
+        // 모노톤 체인
+
+        // 왼쪽에서 오른쪽으로, 위에서 아래로 정렬
+        IEnumerable<Vector3> dots = vertices.OrderBy(v => (v.x, v.y));
+
+        List<Vector3> resultList = new(vertices.Length);
+
+        // 왼쪽에서부터 안으로 꺾이는 점들 탐색
+        foreach (Vector3 v in dots)
+        {
+            while (resultList.Count >= 2 && CounterClockWise(resultList[^2], resultList[^1], v) > 0f)
             {
-                min = v;
+                resultList.RemoveAt(resultList.Count - 1);
             }
+            resultList.Add(v);
         }
 
-        // 가장 밑에 있는 점 기준으로 오른쪽으로 회전한 순서, 먼 거리 순서로 정렬
-        var sorted = vertices
-                    .Where(v => v != min)
-                    .OrderBy(v => (CounterClockWise(min + Vector3.down, min, v), -Vector3.SqrMagnitude(min - v)));
-
-        // 다음 점이 이전 두 점을 지나는 선보다 오른쪽에 있으면 스택에서 점 하나 제거
-        List<Vector3> stack = new() { min };
-        foreach (Vector3 v in sorted)
+        // 오른쪽에서부터 안으로 꺾이는 점들 탐색
+        foreach (Vector3 v in dots.Reverse())
         {
-            while (stack.Count >= 2 && CounterClockWise(stack[^2], stack[^1], v) < 0f)
+            while (resultList.Count >= 2 && CounterClockWise(resultList[^2], resultList[^1], v) > 0f)
             {
-                stack.RemoveAt(stack.Count - 1);
+                resultList.RemoveAt(resultList.Count - 1);
             }
-            stack.Add(v);
+            resultList.Add(v);
         }
 
-        // 시작점과 비교
-        while (stack.Count >= 2 && CounterClockWise(stack[^2], stack[^1], min) < 0f)
-        {
-            stack.RemoveAt(stack.Count - 1);
-        }
+        // 중복 제거
+        IEnumerable<Vector3> distinctResult = resultList.Distinct();
+        int len = distinctResult.Count();
 
-        int len = stack.Count;
-        if (result.Length < len)
+        // 결과를 담을 배열이 너무 작음!
+        if (len > result.Length)
         {
-            throw new ArgumentOutOfRangeException("Result array is too small.");
+            throw new ArgumentOutOfRangeException("Result array's size is too small.");
         }
 
         for (int i = 0; i < len; i++)
         {
-            result[i] = stack[i];
+            result[i] = distinctResult.ElementAt(i);
         }
-
         return len;
     }
 
@@ -151,6 +168,25 @@ public class Obstacle : MonoBehaviour
     /// 직선 = 0
     /// </returns>
     private static float CounterClockWise(Vector3 a, Vector3 b, Vector3 c)
+    {
+        Vector3 v1 = b - a;
+        Vector3 v2 = c - b;
+
+        return v1.x * v2.y - v2.x * v1.y;
+    }
+
+    /// <summary>
+    /// 선의 길이가 모두 1인 세 점 a-b-c를 잇는 꺾은선의 꺾인 방향 구하기
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="c"></param>
+    /// <returns>
+    /// 왼쪽 = 양수<br/>
+    /// 오른쪽 = 음수<br/>
+    /// 직선 = 0
+    /// </returns>
+    private static float CounterClockWiseNormal(Vector3 a, Vector3 b, Vector3 c)
     {
         Vector3 v1 = Vector3.Normalize(b - a);
         Vector3 v2 = Vector3.Normalize(c - b);
