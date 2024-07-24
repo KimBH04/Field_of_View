@@ -3,7 +3,7 @@ using System.Linq;
 using System;
 using UnityEngine;
 
-public static class Geometry
+public static class Geometry2D
 {
     /// <summary>
     /// 가장 큰 볼록 다각형 구하기<br/>
@@ -63,6 +63,13 @@ public static class Geometry
         return len;
     }
 
+    /// <summary>
+    /// 가장 큰 볼록 다각형 구하기<br/>
+    /// x, y값만 취하고 z값은 버림
+    /// </summary>
+    /// <param name="vertices"> 모든 점들 </param>
+    /// <param name="result"> 볼록 다각형을 이루는 점들의 위치 </param>
+    /// <returns> 볼록 다각형을 이루는 점의 개수 </returns>
     public static int ConvexHull(Vector3[] vertices, Vector3[] result)
     {
         Vector2[] v2result = new Vector2[result.Length];

@@ -53,7 +53,7 @@ public class Obstacle : MonoBehaviour
         int n;
         try
         {
-            n = Geometry.ConvexHull(shadowVertices, convexHull);
+            n = Geometry2D.ConvexHull(shadowVertices, convexHull);
         }
         catch (Exception e)
         {
