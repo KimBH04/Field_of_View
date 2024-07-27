@@ -20,17 +20,17 @@ public static class Geometry2D
 
         if (ccw1 == 0f && ccw2 == 0f)
         {
-            if ((a.x, a.y).CompareTo((b.x, b.y)) > 0)
+            if (CompareVector(a, b) > 0)
             {
                 (a, b) = (b, a);
             }
 
-            if ((c.x, c.y).CompareTo((d.x, d.y)) > 0)
+            if (CompareVector(c, d) > 0)
             {
                 (c, d) = (d, c);
             }
 
-            return (c.x, c.y).CompareTo((b.x, b.y)) <= 0 && (a.x, a.y).CompareTo((d.x, d.y)) <= 0;
+            return CompareVector(c, b) <= 0 && CompareVector(a, d) <= 0;
         }
 
         return ccw1 <= 0f && ccw2 <= 0f;
@@ -67,7 +67,7 @@ public static class Geometry2D
     /// <summary>
     /// 볼록 다각형 판별하기
     /// </summary>
-    /// <param name="vertices"> 단순 다각형을 이루는 점들 </param>
+    /// <param name="vertices"> 다각형을 이루는 점들 </param>
     /// <returns></returns>
     public static bool IsConvexPolygon(Vector2[] vertices)
     {
@@ -94,11 +94,18 @@ public static class Geometry2D
     /// <param name="vertices"> 단순 다각형을 이루는 점들 </param>
     /// <param name="results"> 볼록 다각형들 </param>
     /// <param name="counts"> 볼록 다각형의 점의 개수들 </param>
-    /// <returns>볼록 다각형의 수</returns>
+    /// <returns> 볼록 다각형의 수 </returns>
     [Obsolete("", true)]
     public static int Concave2Convex(Vector2[] vertices, Vector2[][] results, int[] counts)
     {
+        // 단순 다각형이 아님!
+        if (!IsSimplyPolygon(vertices))
+        {
+            throw new ArgumentException("It is not simply polygon.");
+        }
+
         throw new NotImplementedException();
+        // Impliment
     }
 
     /// <summary>
@@ -178,7 +185,7 @@ public static class Geometry2D
     }
 
     /// <summary>
-    /// 선의 길이가 모두 1인 세 점 a-b-c를 잇는 꺾은선의 꺾인 방향 구하기
+    /// 선분의 길이가 모두 1인 세 점 a-b-c를 잇는 꺾은선의 꺾인 방향 구하기
     /// </summary>
     /// <param name="a"></param>
     /// <param name="b"></param>
@@ -194,5 +201,28 @@ public static class Geometry2D
         Vector2 v2 = (c - b).normalized;
 
         return v1.x * v2.y - v2.x * v1.y;
+    }
+
+    /// <summary>
+    /// 벡터 크기 비교
+    /// </summary>
+    /// <param name="lhs"></param>
+    /// <param name="rhs"></param>
+    /// <returns></returns>
+    public static int CompareVector(Vector2 lhs, Vector2 rhs)
+    {
+        if (lhs.x < rhs.x)
+            return -1;
+
+        if (lhs.x > rhs.x)
+            return 1;
+
+        if (lhs.y < rhs.y)
+            return -1;
+
+        if (lhs.y > rhs.y)
+            return 1;
+        
+        return  0;
     }
 }
