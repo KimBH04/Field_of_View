@@ -1,17 +1,18 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
+[RequireComponent(typeof(PolygonCollider2D))]
 public class Obstacle : MonoBehaviour
 {
     public Transform viewer;
 
     private MeshFilter filter;
 
-    private Vector3[] vertices;
-    private Vector3[] shadowVertices;
+    private Vector2[] shadowVertices;
     private int meshVerticesCount;
 
-    private readonly Vector3[] convexHull = new Vector3[128];
+    private readonly Vector2[] resultBuffer = new Vector2[128];
 
     private void Start()
     {
@@ -26,10 +27,21 @@ public class Obstacle : MonoBehaviour
         filter.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         filter.mesh = new Mesh();
 
-        Collider2D collider = GetComponent<Collider2D>();
-        Mesh mesh = collider.CreateMesh(true, true);
-        vertices = mesh.vertices;
+        PolygonCollider2D poly = GetComponent<PolygonCollider2D>();
+        Vector2[] vertices = poly.points;
         meshVerticesCount = vertices.Length;
+        shadowVertices = new Vector2[meshVerticesCount * 2];
+
+        for (int i = 0; i < meshVerticesCount; i++)
+        {
+            // 폴리곤 콜라이더의 점 위치는 상대 위치이기 때문에 자신의 트랜스폼 정보를 대입해야함
+            shadowVertices[i] = transform.position +
+                                transform.rotation *
+                                new Vector3(vertices[i].x * transform.lossyScale.x, vertices[i].y * transform.lossyScale.y);
+        }
+
+        // Debug.Log(Geometry2D.IsSimplyPolygon(vertices));
+        // Debug.Log(Geometry2D.IsConvexPolygon(vertices));
     }
 
     private void Update()
@@ -43,21 +55,19 @@ public class Obstacle : MonoBehaviour
         // 점들에서 볼록 다각형을 구해 동적으로 그림자 생성
         // 중간 어느 한 점이 들어간 오목 다각형은 제대로 구할 수 없음
 
-        shadowVertices = new Vector3[meshVerticesCount * 2];
         for (int i = 0; i < meshVerticesCount; i++)
         {
-            shadowVertices[i] = vertices[i];
-            shadowVertices[i + meshVerticesCount] = (vertices[i] - viewer.position) * 50f;
+            shadowVertices[i + meshVerticesCount] = (shadowVertices[i] - (Vector2)viewer.position) * 50f;
         }
 
         int n;
         try
         {
-            n = Geometry2D.ConvexHull(shadowVertices, convexHull);
+            n = Geometry2D.ConvexHull(shadowVertices, resultBuffer);
         }
         catch (Exception e)
         {
-            Debug.Log(e.Message);
+            Debug.LogWarning(e.Message);
             gameObject.SetActive(false);
             return;
         }
@@ -85,11 +95,11 @@ public class Obstacle : MonoBehaviour
         if (n < filter.mesh.vertexCount)
         {
             filter.mesh.SetTriangles(triangles, 0);
-            filter.mesh.SetVertices(convexHull, 0, n);
+            filter.mesh.SetVertices(resultBuffer.Select(v => (Vector3)v).ToArray(), 0, n);
         }
         else
         {
-            filter.mesh.SetVertices(convexHull, 0, n);
+            filter.mesh.SetVertices(resultBuffer.Select(v => (Vector3)v).ToArray(), 0, n);
             filter.mesh.SetTriangles(triangles, 0);
         }
         //치명적이지는 않으나 디버그에 빨간 불 켜지는 거 싫으면 하기
